@@ -1,0 +1,314 @@
+/*----------------------------------------------------------------------------*/
+/*                                                                            */
+/*    Module:       main.cpp                                                  */
+/*    Author:       VEX                                                       */
+/*    Created:      Thu Sep 26 2019                                           */
+/*    Description:  Competition Template                                      */
+/*                                                                            */
+/*----------------------------------------------------------------------------*/
+
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// Robot Configuration:
+// [Name]               [Type]        [Port(s)]
+// leftback             motor         4               
+// rightfront           motor         8               
+// rightback            motor         7               
+// leftfront            motor         1               
+// Controller1          controller                    
+// rightintake          motor         6               
+// leftintake           motor         5               
+// scooperBottom        motor         10              
+// scooperTop           motor         2               
+// vertencoder          encoder       E, F            
+// strafeencoder        encoder       C, D            
+// Inertial3            inertial      3               
+// visionsensor         vision        21              
+// ---- END VEXCODE CONFIGURED DEVICES ----
+
+#include "vex.h"
+
+using namespace vex;
+
+event checkRed = event();
+event checkBlue = event();
+event checkRedup = event();
+event checkBlueup = event ();
+
+competition Competition;
+
+void display()
+{
+  while(true)
+  {
+    Brain.Screen.setCursor(1, 1);
+    Brain.Screen.print("Inertial %f", inertia.rotation(degrees));
+
+    Brain.Screen.setCursor(2, 1);
+    Brain.Screen.print("Vert Encoder %f", vertencoder.position(degrees));
+
+    Brain.Screen.setCursor(3, 1);
+    Brain.Screen.print("Strafe Encoder %f", strafeencoder.position(degrees));
+  }
+}
+
+void forwardsdrive(int distancetotravel)
+{
+  leftfront.setVelocity(35, vex::velocityUnits::pct);
+  leftback.setVelocity(45, vex::velocityUnits::pct);
+  rightfront.setVelocity(50, vex::velocityUnits::pct);
+  rightback.setVelocity(40, vex::velocityUnits::pct);
+
+  vertencoder.setPosition(0,degrees);
+  while(vertencoder.position(degrees) < distancetotravel)
+  {
+    leftfront.spin(forward);
+    leftback.spin(forward);
+    rightfront.spin(forward);
+    rightback.spin(forward);
+  }
+
+  leftfront.stop();
+  leftback.stop();
+  rightfront.stop();
+  rightback.stop();
+}
+
+void backwardsdrive(int distancetotravel)
+{
+  leftfront.setVelocity(35, vex::velocityUnits::pct);
+  leftback.setVelocity(45, vex::velocityUnits::pct);
+  rightfront.setVelocity(50, vex::velocityUnits::pct);
+  rightback.setVelocity(40, vex::velocityUnits::pct);
+  
+  vertencoder.setPosition(0,degrees);
+  while(vertencoder.position(degrees)>distancetotravel)
+  {
+    leftfront.spin(reverse);
+    leftback.spin(reverse);
+    rightfront.spin(reverse);
+    rightback.spin(reverse);
+  }
+  leftfront.stop();
+  leftback.stop();
+  rightfront.stop();
+  rightback.stop();
+}
+
+void leftstrafe(int distancetotravel)
+{
+  strafeencoder.setPosition(0,degrees);
+  leftfront.setVelocity(35, vex::velocityUnits::pct);
+  leftback.setVelocity(45, vex::velocityUnits::pct);
+  rightfront.setVelocity(50, vex::velocityUnits::pct);
+  rightback.setVelocity(40, vex::velocityUnits::pct);
+
+  strafeencoder.setPosition(0,degrees);
+  while(strafeencoder.position(degrees) > distancetotravel)
+  {
+    leftfront.spin(reverse);
+    leftback.spin(forward);
+    rightfront.spin(forward);
+    rightback.spin(reverse);
+  }
+
+  leftfront.stop();
+  leftback.stop();
+  rightfront.stop();
+  rightback.stop();
+}
+
+void rightstrafe(int distancetotravel)
+{
+  strafeencoder.setPosition(0,degrees);
+  leftfront.setVelocity(35, vex::velocityUnits::pct);
+  leftback.setVelocity(45, vex::velocityUnits::pct);
+  rightfront.setVelocity(50, vex::velocityUnits::pct);
+  rightback.setVelocity(40, vex::velocityUnits::pct);
+  
+  strafeencoder.setPosition(0,degrees);
+  while(strafeencoder.position(degrees) < distancetotravel)
+  {
+    leftfront.spin(forward);
+    leftback.spin(reverse);
+    rightfront.spin(reverse);
+    rightback.spin(forward);
+  }
+  leftfront.stop();
+  leftback.stop();
+  rightfront.stop();
+  rightback.stop();
+}
+
+void rightinertialturn(double goaldegrees)
+{
+  inertia.calibrate();
+  while (inertia.isCalibrating()) {
+    wait(.3, seconds);
+  }
+
+  leftfront.setVelocity(35, vex::velocityUnits::pct);
+  leftback.setVelocity(45, vex::velocityUnits::pct);
+  rightfront.setVelocity(50, vex::velocityUnits::pct);
+  rightback.setVelocity(40, vex::velocityUnits::pct);
+    
+  while(inertia.rotation(degrees) < goaldegrees)
+  {
+    leftfront.spin(forward);
+    leftback.spin(forward);
+    rightfront.spin(reverse);
+    rightback.spin(reverse);
+  }
+
+  leftfront.stop();
+  leftback.stop();
+  rightfront.stop();
+  rightback.stop();
+}
+
+void leftinertialturn(double goaldegrees)
+{
+  inertia.calibrate();
+  while (inertia.isCalibrating()) {
+    wait(.3, seconds);
+  }
+
+  leftfront.setVelocity(35, vex::velocityUnits::pct);
+  leftback.setVelocity(45, vex::velocityUnits::pct);
+  rightfront.setVelocity(50, vex::velocityUnits::pct);
+  rightback.setVelocity(40, vex::velocityUnits::pct);
+
+  while(inertia.rotation(degrees) > goaldegrees)
+  {
+    leftfront.spin(reverse);
+    leftback.spin(reverse);
+    rightfront.spin(forward);
+    rightback.spin(forward);
+  }
+
+  leftfront.stop();
+  leftback.stop();
+  rightfront.stop();
+  rightback.stop();
+}
+
+void intake() {
+  visionsensor.takeSnapshot(visionsensor__REDBALL);
+  if (visionsensor.objectCount > 0) 
+  {
+    Brain.Screen.print("Red Object Found");
+    leftintake.spin(vex::directionType::fwd,100,vex::velocityUnits::pct);
+    rightintake.spin(vex::directionType::fwd,100,vex::velocityUnits::pct);
+  } else {
+     Brain.Screen.print("No Red Object");
+  }
+}
+
+void outtake(){
+visionsensor.takeSnapshot(visionsensor__BLUEBALL);
+  if (visionsensor.objectCount > 0) 
+  {
+  Brain.Screen.print("Blue Object Found");
+  leftintake.spin(vex::directionType::rev,100,vex::velocityUnits::pct);
+  rightintake.spin(vex::directionType::rev,100,vex::velocityUnits::pct);
+  } else {
+     Brain.Screen.print("No Blue Object");
+  }
+}
+
+void shoot(){
+  scooperTop.spin(vex::directionType::rev,100,vex::velocityUnits::pct);
+  scooperBottom.spin(vex::directionType::rev,100,vex::velocityUnits::pct);
+}
+
+void pscoop(){
+  scooperTop.spin(vex::directionType::fwd,100,vex::velocityUnits::pct);
+  scooperBottom.spin(vex::directionType::rev,100,vex::velocityUnits::pct);
+}
+
+void stopintake(){
+  leftintake.stop();
+  rightintake.stop();
+}
+
+void stopscoop(){
+  scooperTop.stop();
+  scooperBottom.stop();
+}
+
+void pre_auton(void) {
+  vexcodeInit();
+}
+
+void autonomous(void) {
+  wait (2, seconds);
+  thread t(display);
+
+  shoot();
+
+}
+
+void usercontrol(void) {
+  while (true)
+  {
+    while (true)
+  {
+    double frontLeft = (double)(Controller1.Axis3.position(pct) + Controller1.Axis4.position(pct) + (Controller1.Axis1.position(pct)) * .5);
+    double backLeft = (double)(Controller1.Axis3.position(pct) - Controller1.Axis4.position(pct) + (Controller1.Axis1.position(pct)) * .5);
+    double frontRight = (double)(Controller1.Axis3.position(pct) - Controller1.Axis4.position(pct) - (Controller1.Axis1.position(pct)) * .5);
+    double backRight = (double)(Controller1.Axis3.position(pct) + Controller1.Axis4.position(pct) - (Controller1.Axis1.position(pct)) * .5);
+
+    leftfront.spin(fwd, frontLeft * .85, velocityUnits::pct);
+    leftback.spin(fwd, backLeft * .95, velocityUnits::pct);
+    rightfront.spin(fwd, frontRight,velocityUnits::pct);
+    rightback.spin(fwd, backRight * .9, velocityUnits::pct);
+  
+    if(Controller1.ButtonL1.pressing())
+    {
+      scooperTop.spin(vex::directionType::fwd,100,vex::velocityUnits::pct);
+      scooperBottom.spin(vex::directionType::rev,100,vex::velocityUnits::pct);
+    }
+    else if (Controller1.ButtonR1.pressing())
+    {
+      scooperTop.spin(vex::directionType::rev,100,vex::velocityUnits::pct);
+      scooperBottom.spin(vex::directionType::rev,100,vex::velocityUnits::pct);
+    }
+    else if (Controller1.ButtonL2.pressing())
+    {
+      scooperTop.spin(vex::directionType::rev,100,vex::velocityUnits::pct);
+      scooperBottom.spin(vex::directionType::fwd,100,vex::velocityUnits::pct);
+    }
+    else
+    {
+      scooperTop.stop(vex::brakeType::hold);
+      scooperBottom.stop(vex::brakeType::hold);
+    }
+    if(Controller1.ButtonX.pressing())
+    {
+      leftintake.spin(vex::directionType::rev,100,vex::velocityUnits::pct);
+      rightintake.spin(vex::directionType::rev,100,vex::velocityUnits::pct);
+    }
+    else if (Controller1.ButtonA.pressing())
+    {
+      leftintake.spin(vex::directionType::fwd,100,vex::velocityUnits::pct);
+      rightintake.spin(vex::directionType::fwd,100,vex::velocityUnits::pct);
+    }
+    else
+    {
+      leftintake.stop(vex::brakeType::hold);
+      rightintake.stop(vex::brakeType::hold);
+    }
+    wait(20, msec);
+   }
+  }
+}
+
+int main() {
+  Competition.autonomous(autonomous);
+  Competition.drivercontrol(usercontrol);
+
+  pre_auton();
+
+  while (true) {
+    wait(100, msec);
+  }
+}
