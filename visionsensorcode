@@ -1,0 +1,79 @@
+#include "vex.h"
+
+using namespace vex;
+
+event checkRed = event();
+event checkBlue = event();
+event checkRedup = event();
+event checkBlueup = event ();
+
+
+void hasBlueCallback() {
+  Brain.Screen.setFont(mono20);
+  Brain.Screen.clearLine(1, black);
+  Brain.Screen.setCursor(Brain.Screen.row(), 1);
+  Brain.Screen.setCursor(1, 1);
+  Vision6.takeSnapshot(Vision6__BLUEBALL);
+  if (Vision6.objectCount > 0) {
+    Brain.Screen.print("Blue Object Found");
+    motorcolor.spin(forward);
+  } else {
+    Brain.Screen.print("No Blue Object");
+  }
+}
+
+void hasRedCallback() {
+  Brain.Screen.setFont(mono20);
+  Brain.Screen.clearLine(3, black);
+  Brain.Screen.setCursor(Brain.Screen.row(), 1);
+  Brain.Screen.setCursor(3, 1);
+  Vision6.takeSnapshot(Vision6__REDBALL);
+  if (Vision6.objectCount > 0) {
+    Brain.Screen.print("Red Object Found");
+    motorcolor.spin(reverse);
+
+  } else {
+    Brain.Screen.print("No Red Object");
+  }
+}
+
+void hasRedupCallback() {
+   Brain.Screen.setFont (mono20);
+   Brain.Screen.clearLine(7, black);
+   Brain.Screen.setCursor(7,1);
+   Brain.Screen.setCursor(Brain.Screen.row(),1);
+   Vision6.takeSnapshot(Vision6__REDUPBALL);
+   if (Vision6.objectCount>0) {
+     Brain.Screen.print("Red up object found");
+   } else {
+     Brain.Screen.print("No Red Up object found");
+   }
+ }
+
+void hasBlueupCallback(){
+ Brain.Screen.setFont(mono20);
+ Brain.Screen.clearLine(9,black);
+ Brain.Screen.setCursor(9,1);
+ Brain.Screen.setCursor(Brain.Screen.row(),1);
+ Vision6.takeSnapshot(Vision6__BLUEUPBALL);
+   if (Vision6.objectCount>0) {
+    Brain.Screen.print("Blue up object found");
+  } else {
+     Brain.Screen.print("No Blue Up object found");
+  }
+}
+
+int main() {
+  vexcodeInit();
+  checkBlue(hasBlueCallback);
+  checkRed(hasRedCallback);
+  checkRedup(hasRedupCallback);
+  checkBlueup(hasBlueupCallback);
+   while (true) {
+    checkBlue.broadcastAndWait();
+    checkRed.broadcastAndWait();
+    checkRedup.broadcastAndWait();
+    checkBlueup.broadcastAndWait(); 
+    wait(0.2, seconds);
+  }
+}
